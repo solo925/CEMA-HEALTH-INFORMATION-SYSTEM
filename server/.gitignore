@@ -1,0 +1,64 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django stuff:
+*.log
+*.pot
+*.pyc
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+static_root/
+static/
+
+# If you use Django's collectstatic
+/staticfiles/
+/static_cdn/
+/media_cdn/
+
+# Environment
+.env
+.env.local
+# .env.*
+
+# IDEs and editors
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# OS generated
+.DS_Store
+Thumbs.db
+
+# Pipenv
+Pipfile.lock
+
+# pytest
+.cache/
+.pytest_cache/
+
+# Migrations (if you prefer not to track initial empty migrations)
+**/migrations/*.pyc
+**/migrations/*.pyo
+**/migrations/__pycache__/
+# Optional: Ignore migration files completely
+# **/migrations/
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+
+# Docker
+*.pid
+venv/
