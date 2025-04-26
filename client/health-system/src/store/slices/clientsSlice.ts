@@ -1,13 +1,8 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { Client } from '../../types/client.types';
 import { clientService } from '../../services/client.service';
+import { ClientsState } from '../../types/index.types';
 
-interface ClientsState {
-  clients: Client[];
-  selectedClient: Client | null;
-  isLoading: boolean;
-  error: string | null;
-}
 
 const initialState: ClientsState = {
   clients: [],
@@ -22,7 +17,7 @@ export const fetchClients = createAsyncThunk(
     try {
       const clients = await clientService.getClients();
       return clients;
-    } catch (error) {
+    } catch (error:any) {
       return rejectWithValue(error.message);
     }
   }
@@ -34,7 +29,7 @@ export const fetchClientById = createAsyncThunk(
     try {
       const client = await clientService.getClientById(id);
       return client;
-    } catch (error) {
+    } catch (error:any) {
       return rejectWithValue(error.message);
     }
   }
@@ -46,7 +41,7 @@ export const createClient = createAsyncThunk(
     try {
       const client = await clientService.createClient(clientData);
       return client;
-    } catch (error) {
+    } catch (error:any) {
       return rejectWithValue(error.message);
     }
   }
@@ -58,7 +53,7 @@ export const updateClient = createAsyncThunk(
     try {
       const client = await clientService.updateClient(id, data);
       return client;
-    } catch (error) {
+    } catch (error:any) {
       return rejectWithValue(error.message);
     }
   }
@@ -70,7 +65,7 @@ export const enrollClientInProgram = createAsyncThunk(
     try {
       const response = await clientService.enrollInProgram(clientId, programId);
       return { clientId, programId, enrollment: response };
-    } catch (error) {
+    } catch (error:any) {
       return rejectWithValue(error.message);
     }
   }

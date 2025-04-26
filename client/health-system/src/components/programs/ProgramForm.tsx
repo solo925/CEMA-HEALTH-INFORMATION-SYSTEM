@@ -20,15 +20,20 @@ import * as yup from 'yup';
 import { useAddProgramMutation } from '../../store/api/programsApi';
 import { ProgramFormData } from '../../types/program.types';
 import { ERROR_MESSAGES } from '../../constants/errorMessages';
+import { SubmitHandler } from 'react-hook-form';
+
+
 
 const validationSchema = yup.object().shape({
   name: yup.string().required(ERROR_MESSAGES.REQUIRED_FIELD),
   description: yup.string().required(ERROR_MESSAGES.REQUIRED_FIELD),
   startDate: yup.string().required(ERROR_MESSAGES.REQUIRED_FIELD),
-  endDate: yup.string().nullable(),
+  endDate: yup.string().nullable().optional(),
   status: yup.string().oneOf(['active', 'completed', 'planned']).required(ERROR_MESSAGES.REQUIRED_FIELD),
   capacity: yup.number().nullable().transform((v) => (isNaN(v) ? null : v)),
 });
+
+
 
 const defaultValues: ProgramFormData = {
   name: '',
@@ -58,16 +63,21 @@ const ProgramForm: React.FC<ProgramFormProps> = ({ onSuccess }) => {
     watch,
     formState: { errors },
   } = useForm<ProgramFormData>({
-    resolver: yupResolver(validationSchema),
+    resolver: yupResolver(validationSchema) as any,
     defaultValues,
   });
 
   const watchStartDate = watch('startDate');
-
-  const onSubmit = useCallback(
+  type T = any
+  const onSubmit:SubmitHandler<T> = useCallback(
     async (data: ProgramFormData) => {
       try {
-        await addProgram(data).unwrap();
+
+        const formattedData = {
+          ...data,
+          endDate: data.endDate ?? undefined,
+        };
+        await addProgram(formattedData).unwrap();
         setSnackbar({
           open: true,
           message: 'Program created successfully!',

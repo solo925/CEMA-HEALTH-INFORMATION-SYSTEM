@@ -1,10 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { UiState } from '../../types/index.types';
 
-interface UiState {
-  sidebarOpen: boolean;
-  theme: 'light' | 'dark';
-  notifications: Notification[];
-}
 
 interface Notification {
   id: string;

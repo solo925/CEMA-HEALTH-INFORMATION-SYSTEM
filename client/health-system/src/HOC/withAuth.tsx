@@ -8,7 +8,7 @@ export const withAuth = <P extends object>(
   WrappedComponent: ComponentType<P>
 ) => {
   const WithAuth: React.FC<P> = (props) => {
-    const { isAuthenticated, loading } = useAppSelector((state) => state.auth);
+    const { isAuthenticated, loading } = useAppSelector((state: { auth: any; }) => state.auth);
     const navigate = useNavigate();
 
     useEffect(() => {

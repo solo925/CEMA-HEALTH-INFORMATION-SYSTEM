@@ -49,7 +49,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAppSelector((state) => state.auth);
+  const { user } = useAppSelector((state: { auth: any; }) => state.auth);
 
   const handleDrawerToggle = useCallback(() => {
     setOpen((prevOpen) => !prevOpen);

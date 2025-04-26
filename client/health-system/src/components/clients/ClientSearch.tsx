@@ -44,7 +44,7 @@ const ClientSearch: React.FC<ClientSearchProps> = ({ onClientSelect }) => {
     
     return (
       <Paper elevation={3} sx={{ mt: 2, maxHeight: 300, overflow: 'auto' }}>
-        {clients.map((client) => (
+        {clients.map((client: Client) => (
           <Box
             key={client.id}
             onClick={() => handleClientClick(client)}

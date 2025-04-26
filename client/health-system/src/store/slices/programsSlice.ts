@@ -1,13 +1,8 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { Program } from '../../types/program.types';
 import { programService } from '../../services/program.service';
+import { ProgramsState } from '../../types/index.types';
 
-interface ProgramsState {
-  programs: Program[];
-  selectedProgram: Program | null;
-  isLoading: boolean;
-  error: string | null;
-}
 
 const initialState: ProgramsState = {
   programs: [],
@@ -22,7 +17,7 @@ export const fetchPrograms = createAsyncThunk(
     try {
       const programs = await programService.getPrograms();
       return programs;
-    } catch (error) {
+    } catch (error:any) {
       return rejectWithValue(error.message);
     }
   }
@@ -34,7 +29,7 @@ export const fetchProgramById = createAsyncThunk(
     try {
       const program = await programService.getProgramById(id);
       return program;
-    } catch (error) {
+    } catch (error:any) {
       return rejectWithValue(error.message);
     }
   }
@@ -46,7 +41,7 @@ export const createProgram = createAsyncThunk(
     try {
       const program = await programService.createProgram(programData);
       return program;
-    } catch (error) {
+    } catch (error:any) {
       return rejectWithValue(error.message);
     }
   }
@@ -58,7 +53,7 @@ export const updateProgram = createAsyncThunk(
     try {
       const program = await programService.updateProgram(id, data);
       return program;
-    } catch (error) {
+    } catch (error:any) {
       return rejectWithValue(error.message);
     }
   }

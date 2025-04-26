@@ -32,6 +32,7 @@ import LoadingSpinner from '../common/LoadingSpinner';
 import { useEnrollClientInProgramMutation } from '../../store/api/clientsApi';
 import { ERROR_MESSAGES } from '../../constants/errorMessages';
 import { formatDate } from '../../utils/formatters';
+import { useGetProgramsQuery } from '../../store/api/programsApi';
 
 
 interface ClientEnrollmentProps {

@@ -1,15 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { authService } from '../../services/auth.service';
-import { secureStorage } from '../../utils/secureStorage';
+import { secureStorage } from '../../utils/localStorage';
+import { AuthState } from '../../types/index.types';
 
-interface AuthState {
-  token: string | null;
-  refreshToken: string | null;
-  user: any | null;
-  isAuthenticated: boolean;
-  loading: boolean;
-  error: string | null;
-}
 
 const initialState: AuthState = {
   token: secureStorage.getItem('token'),
@@ -28,7 +21,7 @@ export const login = createAsyncThunk(
       secureStorage.setItem('token', data.access);
       secureStorage.setItem('refreshToken', data.refresh);
       return data;
-    } catch (error) {
+    } catch (error:any) {
       return rejectWithValue(error.message);
     }
   }
@@ -46,7 +39,7 @@ export const refreshToken = createAsyncThunk(
       const data = await authService.refreshToken(auth.refreshToken);
       secureStorage.setItem('token', data.access);
       return data;
-    } catch (error) {
+    } catch (error:any) {
       return rejectWithValue(error.message);
     }
   }
