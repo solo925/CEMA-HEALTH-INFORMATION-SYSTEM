@@ -91,7 +91,6 @@ const LoginPage: React.FC = () => {
     }
   
     try {
-      console.log("Attempting login with:", { email, password });  // Don't log password for security
       const result = await login({ email, password }).unwrap();
   
       // If login is successful, manually navigate
@@ -102,12 +101,8 @@ const LoginPage: React.FC = () => {
     } catch (err) {
       console.error('Login error details:', err);
       setMessage(null); 
-  
-      setEmail('');
-      setPassword('');
     }
   };
-  
   
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);

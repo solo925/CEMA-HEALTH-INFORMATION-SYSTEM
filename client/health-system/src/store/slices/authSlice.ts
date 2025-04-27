@@ -3,10 +3,8 @@ import { authService } from '../../services/auth.service';
 import { secureStorage } from '../../utils/localStorage';
 import { AuthState } from '../../types/index.types';
 
-
 const initialState: AuthState = {
   token: secureStorage.getItem('token'),
-  refreshToken: secureStorage.getItem('refreshToken'),
   user: null,
   isAuthenticated: !!secureStorage.getItem('token'),
   loading: false,
@@ -14,32 +12,13 @@ const initialState: AuthState = {
 };
 
 export const login = createAsyncThunk(
-  'auth/login',
-  async ({ email, password }: { email: string; password: string }, { rejectWithValue }) => {
+  "auth/login",
+  async (credentials: { email: string; password: string; }, { rejectWithValue }) => {
     try {
-      const data = await authService.login(email, password);
-      secureStorage.setItem('token', data.access);
-      secureStorage.setItem('refreshToken', data.refresh);
+      const data = await authService.login(credentials);
+      secureStorage.setItem("token", data.token);  // Store the token
       return data;
-    } catch (error:any) {
-      return rejectWithValue(error.message);
-    }
-  }
-);
-
-export const refreshToken = createAsyncThunk(
-  'auth/refreshToken',
-  async (_, { getState, rejectWithValue }) => {
-    try {
-      const { auth } = getState() as { auth: AuthState };
-      if (!auth.refreshToken) {
-        throw new Error('No refresh token available');
-      }
-      
-      const data = await authService.refreshToken(auth.refreshToken);
-      secureStorage.setItem('token', data.access);
-      return data;
-    } catch (error:any) {
+    } catch (error: any) {
       return rejectWithValue(error.message);
     }
   }
@@ -49,11 +28,11 @@ export const logout = createAsyncThunk(
   'auth/logout',
   async (_, { getState }) => {
     const { auth } = getState() as { auth: AuthState };
-    if (auth.refreshToken) {
-      await authService.logout(auth.refreshToken);
+    if (auth.token) {
+      // Pass the refreshToken if required by your logout service
+      await authService.logout(auth.token);  // Assuming you need to pass the token here
     }
-    secureStorage.removeItem('token');
-    secureStorage.removeItem('refreshToken');
+    secureStorage.removeItem('token');  // Clear token from storage
   }
 );
 
@@ -75,8 +54,7 @@ const authSlice = createSlice({
       .addCase(login.fulfilled, (state, action) => {
         state.loading = false;
         state.isAuthenticated = true;
-        state.token = action.payload.access;
-        state.refreshToken = action.payload.refresh;
+        state.token = action.payload.token;  // Set token
         state.user = action.payload.user;
       })
       .addCase(login.rejected, (state, action) => {
@@ -84,23 +62,9 @@ const authSlice = createSlice({
         state.error = action.payload as string;
       })
       
-      // Refresh Token
-      .addCase(refreshToken.fulfilled, (state, action) => {
-        state.token = action.payload.access;
-      })
-      .addCase(refreshToken.rejected, (state) => {
-        state.token = null;
-        state.refreshToken = null;
-        state.isAuthenticated = false;
-        state.user = null;
-        secureStorage.removeItem('token');
-        secureStorage.removeItem('refreshToken');
-      })
-      
       // Logout
       .addCase(logout.fulfilled, (state) => {
         state.token = null;
-        state.refreshToken = null;
         state.isAuthenticated = false;
         state.user = null;
       });

@@ -32,8 +32,8 @@ import {
 } from '@mui/icons-material';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ROUTES } from '../../constants/routes';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { logout } from '../../store/slices/authSlice';
+// import { useAppDispatch, useAppSelector } from '../../store/hooks';
+// import { logout } from '../../store/slices/authSlice';
 
 const drawerWidth = 240;
 
@@ -46,10 +46,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [open, setOpen] = useState(!isMobile);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const dispatch = useAppDispatch();
+  // const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAppSelector((state: { auth: any; }) => state.auth);
+  // const { user } = useAppSelector((state: { auth: any; }) => state.auth);
 
   const handleDrawerToggle = useCallback(() => {
     setOpen((prevOpen) => !prevOpen);
@@ -63,10 +63,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     setAnchorEl(null);
   }, []);
 
-  const handleLogout = useCallback(() => {
-    dispatch(logout());
-    navigate(ROUTES.LOGIN);
-  }, [dispatch, navigate]);
+  // const handleLogout = useCallback(() => {
+  //   dispatch(logout());
+  //   navigate(ROUTES.LOGIN);
+  // }, [dispatch, navigate]);
 
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: ROUTES.DASHBOARD },
@@ -133,7 +133,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     fontSize: '1rem',
                   }}
                 >
-                  {user?.firstName?.charAt(0) || 'U'}
+                  {/* {user?.firstName?.charAt(0) || 'U'} */}
                 </Avatar>
               </IconButton>
             </Tooltip>
@@ -287,7 +287,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           Settings
         </MenuItem>
         <Divider />
-        <MenuItem onClick={handleLogout}>
+        <MenuItem>
           <ListItemIcon>
             <LogoutIcon fontSize="small" color="error" />
           </ListItemIcon>

@@ -1,58 +1,61 @@
 import { API_PATHS } from '../constants/apiPaths';
-import { store } from '../store/store';
-import { refreshToken, logout } from '../store/slices/authSlice';
-
-interface RequestOptions extends RequestInit {
-  skipAuth?: boolean;
-}
 
 class ApiService {
-  private async request<T>(url: string, options: RequestOptions = {}): Promise<T> {
+  private async request<T>(url: string, options: RequestInit = {}): Promise<T> {
     try {
-      const { skipAuth = false, ...fetchOptions } = options;
+      // Get auth token from Redux store - COMMENTED OUT
+      // const state = store.getState();
+      // const token = state.auth.token;
       
-      // Get auth token from Redux store
-      let headers = new Headers(fetchOptions.headers || {});
+      let headers = new Headers(options.headers || {});
       
-      if (!skipAuth) {
-        const state = store.getState();
-        const token = state.auth.token;
-        
-        if (token) {
-          headers.set('Authorization', `Bearer ${token}`);
-        }
-      }
+      // AUTHENTICATION REMOVED
+      // if (token) {
+      //   headers.set('Authorization', `Bearer ${token}`);
+      // }
       
       // Always send and receive JSON unless otherwise specified
       if (!headers.has('Content-Type') && options.method !== 'GET' && options.body) {
         headers.set('Content-Type', 'application/json');
       }
       
+      console.log(`Making request to: ${url}`, { 
+        method: options.method || 'GET',
+        headers: Object.fromEntries(headers.entries()),
+        body: options.body ? '(data)' : undefined 
+      });
+      
       const response = await fetch(url, {
-        ...fetchOptions,
+        ...options,
         headers,
       });
       
-      // Handle token expiration
-      if (response.status === 401) {
-        try {
-          // Try to refresh the token
-          await store.dispatch(refreshToken());
-          
-          // Retry the request with the new token
-          return this.request<T>(url, options);
-        } catch (refreshError) {
-          // If refresh fails, log out the user
-          store.dispatch(logout());
-          throw new Error('Session expired. Please log in again.');
-        }
-      }
+      // TOKEN REFRESH LOGIC REMOVED
+      // if (response.status === 401) {
+      //   try {
+      //     // Try to refresh the token
+      //     await store.dispatch(refreshToken());
+      //     
+      //     // Retry the request with the new token
+      //     return this.request<T>(url, options);
+      //   } catch (refreshError) {
+      //     // If refresh fails, log out the user
+      //     store.dispatch(logout());
+      //     throw new Error('Session expired. Please log in again.');
+      //   }
+      // }
       
       // Handle error responses
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        console.error('API Error Response:', {
+          status: response.status,
+          statusText: response.statusText,
+          data: errorData
+        });
+        
         throw new Error(
-          errorData.message || `Request failed with status ${response.status}`
+          errorData.message || errorData.detail || `Request failed with status ${response.status}`
         );
       }
       
@@ -63,6 +66,7 @@ class ApiService {
       
       // Parse JSON response
       const data = await response.json();
+      console.log(`Response from ${url}:`, { status: response.status, data: '(data)' });
       return data as T;
     } catch (error) {
       console.error('API request failed:', error);
@@ -70,11 +74,11 @@ class ApiService {
     }
   }
   
-  async get<T>(url: string, options: RequestOptions = {}): Promise<T> {
+  async get<T>(url: string, options: RequestInit = {}): Promise<T> {
     return this.request<T>(url, { ...options, method: 'GET' });
   }
   
-  async post<T>(url: string, data: any, options: RequestOptions = {}): Promise<T> {
+  async post<T>(url: string, data: any, options: RequestInit = {}): Promise<T> {
     return this.request<T>(url, {
       ...options,
       method: 'POST',
@@ -82,7 +86,7 @@ class ApiService {
     });
   }
   
-  async put<T>(url: string, data: any, options: RequestOptions = {}): Promise<T> {
+  async put<T>(url: string, data: any, options: RequestInit = {}): Promise<T> {
     return this.request<T>(url, {
       ...options,
       method: 'PUT',
@@ -90,7 +94,7 @@ class ApiService {
     });
   }
   
-  async patch<T>(url: string, data: any, options: RequestOptions = {}): Promise<T> {
+  async patch<T>(url: string, data: any, options: RequestInit = {}): Promise<T> {
     return this.request<T>(url, {
       ...options,
       method: 'PATCH',
@@ -98,10 +102,9 @@ class ApiService {
     });
   }
   
-  async delete<T>(url: string, options: RequestOptions = {}): Promise<T> {
+  async delete<T>(url: string, options: RequestInit = {}): Promise<T> {
     return this.request<T>(url, { ...options, method: 'DELETE' });
   }
 }
 
 export const apiService = new ApiService();
-

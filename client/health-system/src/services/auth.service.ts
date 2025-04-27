@@ -1,40 +1,27 @@
 // auth.service.ts - Updated version
 import { API_PATHS } from '../constants/apiPaths';
-export const authService = {
-  async login(email: unknown, password: unknown) {
-    // Convert inputs with strict type checking
-    const convertValue = (val: unknown) => {
-      if (typeof val !== 'string') {
-        console.error('Invalid type received:', { val, type: typeof val });
-        return '';
-      }
-      return val.trim();
-    };
+import { Credentials } from '../types/index.types';
 
-    const strEmail = convertValue(email);
-    const strPassword = convertValue(password);
+export const authService = {
+  async login(credentials: Credentials) {
+
 
     // Debugging logs with actual values
     console.log('Processed credentials:', {
-      originalEmail: email,
-      originalPassword: password,
-      processedEmail: strEmail,
-      processedPassword: strPassword
+      processedEmail: credentials.email,
+      processedPassword: credentials.password
     });
 
-    if (!strEmail || !strPassword) {
-      throw new Error(`Validation failed - Email: "${strEmail}", Password: "${strPassword}"`);
+    if (!credentials.email || !credentials.password) {
+      throw new Error(`Validation failed - Email: "${credentials.email}", Password: "${credentials.password}"`);
     }
 
-    // Rest of the existing code remains unchanged
     const response = await fetch(API_PATHS.AUTH.LOGIN, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email: strEmail,
-        password: strPassword
+        email: credentials.email,
+        password: credentials.password,
       }),
     });
     if (!response.ok) {
@@ -56,7 +43,7 @@ export const authService = {
       },
       body: JSON.stringify({ refresh: refreshToken }),
     });
-    
+
     if (!response.ok) {
       throw new Error('Token refresh failed');
     }
@@ -72,7 +59,7 @@ export const authService = {
       },
       body: JSON.stringify({ refresh: refreshToken }),
     });
-    
+
     return response.ok;
   },
 };

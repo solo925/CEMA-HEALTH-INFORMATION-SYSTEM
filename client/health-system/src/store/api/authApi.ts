@@ -7,8 +7,9 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  access: string;
-  refresh: string;
+  token: string; 
+  email:string;
+  password:string; 
   user: {
     id: string;
     email: string;
@@ -36,36 +37,24 @@ export interface RegistrationResponse {
   };
 }
 
-export interface RefreshRequest {
-  refresh: string;
-}
-
-export interface RefreshResponse {
-  access: string;
-}
-
 export const authApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    // Update the login mutation in authApi.ts to use the correct field names
-login: builder.mutation({
-  query: (credentials) => ({
-    url: '/auth/login/',
-    method: 'POST',
-    body: credentials,
-  }),
-  async onQueryStarted(_, { dispatch, queryFulfilled }) {
-    try {
-      console.log("Login request started");
-      const { data } = await queryFulfilled;
-      console.log("Login successful, dispatching login action");
-      dispatch(loginAction(data));
-    } catch (error) {
-      console.error("Login error in onQueryStarted:", error);
-    }
-  },
-}),
+    login: builder.mutation<LoginResponse, LoginRequest>({
+      query: (credentials) => ({
+        url: '/auth/login/',
+        method: 'POST',
+        body: { email: credentials.email, password: credentials.password },
+      }),
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(loginAction(data));  // Dispatch login action with token
+        } catch (error) {
+          console.error("Login error in onQueryStarted:", error);
+        }
+      },
+    }),
 
-    
     register: builder.mutation<RegistrationResponse, RegistrationRequest>({
       query: (userData) => ({
         url: '/auth/register/',
@@ -73,27 +62,18 @@ login: builder.mutation({
         body: userData,
       }),
     }),
-    
-    refresh: builder.mutation<RefreshResponse, RefreshRequest>({
-      query: (refreshToken) => ({
-        url: '/auth/refresh/',
-        method: 'POST',
-        body: refreshToken,
-      }),
-    }),
-    
+
     logout: builder.mutation<void, void>({
       query: () => ({
         url: '/auth/logout/',
-        method: 'POST'
+        method: 'POST',
       }),
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
-          // Dispatch logout action to clear auth state
-          dispatch(logout());
+          dispatch(logout());  // Dispatch logout action to clear auth state
         } catch (error) {
-          // Error is handled by RTK Query
+          console.error("Logout error in onQueryStarted:", error);
         }
       },
     }),
@@ -103,6 +83,5 @@ login: builder.mutation({
 export const {
   useLoginMutation,
   useRegisterMutation,
-  useRefreshMutation,
   useLogoutMutation,
 } = authApi;

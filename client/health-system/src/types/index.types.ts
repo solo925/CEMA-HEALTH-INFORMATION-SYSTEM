@@ -2,6 +2,19 @@ import { Client, Program } from "./client.types";
 
 export interface AuthState {
     token: string | null;
+    refreshToken?: string | null;
+    user: any | null;
+    isAuthenticated: boolean;
+    loading: boolean;
+    error: string | null;
+}
+
+export interface Credentials {
+  email: string;
+  password: string;
+}
+
+export interface AuthState1{
     refreshToken: string | null;
     user: any | null;
     isAuthenticated: boolean;
