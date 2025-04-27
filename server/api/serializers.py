@@ -97,3 +97,94 @@ class ClientEnrollmentSerializer(serializers.Serializer):
         )
         
         return enrollment
+    
+class UserRegistrationSerializer(serializers.ModelSerializer):
+    """Serializer for user registration"""
+    password = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
+    password_confirm = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
+    
+    class Meta:
+        model = User
+        fields = ('email', 'first_name', 'last_name', 'password', 'password_confirm')
+        extra_kwargs = {
+            'first_name': {'required': True},
+            'last_name': {'required': True}
+        }
+    
+    def validate(self, data):
+        """Validate that passwords match"""
+        if data['password'] != data['password_confirm']:
+            raise serializers.ValidationError({"password_confirm": "Passwords do not match."})
+        
+        # Validate password complexity
+        password = data['password']
+        if len(password) < 8:
+            raise serializers.ValidationError({"password": "Password must be at least 8 characters long."})
+        
+        if not any(char.isdigit() for char in password):
+            raise serializers.ValidationError({"password": "Password must contain at least one digit."})
+        
+        if not any(char.isalpha() for char in password):
+            raise serializers.ValidationError({"password": "Password must contain at least one letter."})
+        
+        return data
+    
+    def create(self, validated_data):
+        """Create and return a new user"""
+        # Remove password_confirm from the data
+        validated_data.pop('password_confirm')
+        
+        # Create the user
+        user = User.objects.create_user(
+            email=validated_data['email'],
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name'],
+            password=validated_data['password']
+        )
+        
+        return user
+    
+    
+# from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+# class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+#     """Custom serializer to use email instead of username"""
+#     @classmethod
+#     def get_token(cls, user):
+#         token = super().get_token(user)
+
+#         # Add custom claims if needed
+#         token['email'] = user.email
+#         token['first_name'] = user.first_name
+#         token['last_name'] = user.last_name
+
+#         return token
+
+#     def validate(self, attrs):
+#         # change username to email
+#         credentials = {
+#             'email': attrs.get('email'),
+#             'password': attrs.get('password')
+#         }
+
+#         from django.contrib.auth import authenticate
+#         user = authenticate(**credentials)
+
+#         if user is None:
+#             raise serializers.ValidationError('Invalid email or password')
+
+#         refresh = self.get_token(user)
+
+#         data = {
+#             'refresh': str(refresh),
+#             'access': str(refresh.access_token),
+#             'user': {
+#                 'id': str(user.id),
+#                 'email': user.email,
+#                 'first_name': user.first_name,
+#                 'last_name': user.last_name,
+#             }
+#         }
+
+#         return data
+

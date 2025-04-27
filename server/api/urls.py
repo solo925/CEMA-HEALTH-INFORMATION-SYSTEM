@@ -1,9 +1,15 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import HealthProgramViewSet, ClientViewSet
+from .views import HealthProgramViewSet, ClientViewSet,RegisterView,LoginView
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+# from .views import EmailTokenObtainPairView
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+    TokenVerifyView,
+)
 
 # Create a router and register our viewsets
 router = DefaultRouter()
@@ -28,8 +34,12 @@ urlpatterns = [
     # API endpoints
     path('', include(router.urls)),
     
+
     # Authentication endpoints
-    path('auth/', include('rest_framework_simplejwt.urls')),
+    path('auth/login/', LoginView.as_view(), name='login'),
+    path('auth/register/', RegisterView.as_view(), name='register'),
+    path('auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('auth/verify/', TokenVerifyView.as_view(), name='token_verify'),
     
     # API documentation
     path('swagger<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),

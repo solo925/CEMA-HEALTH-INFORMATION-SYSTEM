@@ -30,9 +30,10 @@ import { ROUTES } from '../constants/routes';
 import { formatDate } from '../utils/formatters';
 import { withAuth } from '../HOC/withAuth';
 import { withLoading } from '../HOC/withLoading';
+import { statCards } from '../types/index.types';
 
-// Reusable stat card component
-const StatCard = ({ title, value, icon, color }) => {
+
+const StatCard = ({ title, value, icon, color }:statCards) => {
   const theme = useTheme();
   
   return (
@@ -149,7 +150,7 @@ const DashboardPage = () => {
       </Box>
 
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={4} {...({} as any)}>
           <StatCard
             title="Total Clients"
             value={stats.totalClients}
@@ -157,7 +158,7 @@ const DashboardPage = () => {
             color={theme.palette.primary.main}
           />
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={4} {...({} as any)}>
           <StatCard
             title="Active Programs"
             value={stats.activePrograms}
@@ -165,7 +166,7 @@ const DashboardPage = () => {
             color={theme.palette.success.main}
           />
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={4} {...({} as any)}>
           <StatCard
             title="Total Enrollments"
             value={stats.totalEnrollments}
@@ -176,7 +177,7 @@ const DashboardPage = () => {
       </Grid>
 
       <Grid container spacing={3}>
-        <Grid item xs={12} md={7}>
+        <Grid item xs={12} md={7} {...({} as any)}>
           <Paper elevation={2} sx={{ p: 3, height: '100%' }}>
             <Box
               sx={{
@@ -233,7 +234,7 @@ const DashboardPage = () => {
           </Paper>
         </Grid>
 
-        <Grid item xs={12} md={5}>
+        <Grid item xs={12} md={5} {...({} as any)}>
           <Paper elevation={2} sx={{ p: 3, height: '100%' }}>
             <Box
               sx={{

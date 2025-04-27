@@ -209,7 +209,7 @@ const ProgramsPage: React.FC = () => {
             
             <Grid container spacing={3}>
               {groupedPrograms[status].map((program) => (
-                <Grid item xs={12} md={6} lg={4} key={program.id}>
+                <Grid item xs={12} md={6} lg={4} key={program.id} {...({} as any)}>
                   <ProgramCard program={program} onView={handleViewProgram} />
                 </Grid>
               ))}

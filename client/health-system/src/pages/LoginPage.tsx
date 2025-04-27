@@ -10,17 +10,25 @@ import {
   IconButton,
   Alert,
   CircularProgress,
+  Divider,
+  Link,
 } from '@mui/material';
 import {
   VisibilityOff as VisibilityOffIcon,
   Visibility as VisibilityIcon,
   MedicalServices as MedicalIcon,
+  Login as LoginIcon,
 } from '@mui/icons-material';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link as RouterLink } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { login, clearError } from '../store/slices/authSlice';
+import { useLoginMutation } from '../store/api/authApi';
 import { ROUTES } from '../constants/routes';
 import { isValidEmail } from '../utils/validators';
+
+interface LocationState {
+  from?: { pathname: string };
+  message?: string;
+}
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -30,38 +38,33 @@ const LoginPage: React.FC = () => {
     email: '',
     password: '',
   });
-  
+  const [message, setMessage] = useState<string | null>(null);
+
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  
-  const { isAuthenticated, loading, error } = useAppSelector((state) => state.auth);
-  
+  const state = location.state as LocationState;
+
+  const { isAuthenticated, loading } = useAppSelector((state) => state.auth);
+  const [login, { isLoading, isError, error }] = useLoginMutation();
+
+  // Set message from state or empty
+  useEffect(() => {
+    setMessage(state?.message || null);
+  }, [state?.message]);
+
   // Redirect to dashboard if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      const from = (location.state as any)?.from?.pathname || ROUTES.DASHBOARD;
+      const from = state?.from?.pathname || ROUTES.DASHBOARD;
       navigate(from, { replace: true });
     }
-  }, [isAuthenticated, navigate, location]);
-  
-  // Clear error on component unmount
-  useEffect(() => {
-    return () => {
-      if (error) {
-        dispatch(clearError());
-      }
-    };
-  }, [dispatch, error]);
-  
+  }, [isAuthenticated, navigate, state]);
+
   const validateForm = (): boolean => {
-    const newErrors = {
-      email: '',
-      password: '',
-    };
-    
+    const newErrors = { email: '', password: '' };
     let isValid = true;
-    
+
     if (!email) {
       newErrors.email = 'Email is required';
       isValid = false;
@@ -69,25 +72,42 @@ const LoginPage: React.FC = () => {
       newErrors.email = 'Enter a valid email address';
       isValid = false;
     }
-    
+
     if (!password) {
       newErrors.password = 'Password is required';
       isValid = false;
     }
-    
+
     setErrors(newErrors);
     return isValid;
   };
-  
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+  
+    // Only proceed if the form is valid
     if (!validateForm()) {
       return;
     }
-    
-    dispatch(login({ email, password }));
+  
+    try {
+      console.log("Attempting login with:", { email, password });  // Don't log password for security
+      const result = await login({ email, password }).unwrap();
+  
+      // If login is successful, manually navigate
+      if (result) {
+        const from = state?.from?.pathname || ROUTES.DASHBOARD;
+        navigate(from, { replace: true });
+      }
+    } catch (err) {
+      console.error('Login error details:', err);
+      setMessage(null); 
+  
+      setEmail('');
+      setPassword('');
+    }
   };
+  
   
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
@@ -95,18 +115,18 @@ const LoginPage: React.FC = () => {
       setErrors((prev) => ({ ...prev, email: '' }));
     }
   };
-  
+
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value);
     if (errors.password) {
       setErrors((prev) => ({ ...prev, password: '' }));
     }
   };
-  
+
   const toggleShowPassword = () => {
     setShowPassword((prev) => !prev);
   };
-  
+
   return (
     <Box
       sx={{
@@ -135,30 +155,36 @@ const LoginPage: React.FC = () => {
               mb: 4,
             }}
           >
-            <MedicalIcon
-              sx={{ fontSize: 40, color: 'primary.main', mr: 1 }}
-            />
+            <MedicalIcon sx={{ fontSize: 40, color: 'primary.main', mr: 1 }} />
             <Typography component="h1" variant="h4" fontWeight="bold">
               Health Information System
             </Typography>
           </Box>
-          
-          <Typography component="h2" variant="h5" gutterBottom>
-            Sign In
-          </Typography>
-          
-          {error && (
-            <Alert severity="error" sx={{ mb: 2, width: '100%' }}>
-              {error}
+
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+            <LoginIcon sx={{ mr: 1, fontSize: 24 }} />
+            <Typography component="h2" variant="h5">
+              Sign In
+            </Typography>
+          </Box>
+
+          {/* Success Message */}
+          {message && (
+            <Alert severity="success" sx={{ mb: 2, width: '100%' }}>
+              {message}
             </Alert>
           )}
-          
-          <Box
-            component="form"
-            onSubmit={handleSubmit}
-            noValidate
-            sx={{ width: '100%', mt: 1 }}
-          >
+
+          {/* Error Message */}
+          {isError && (
+            <Alert severity="error" sx={{ mb: 2, width: '100%' }}>
+              {typeof error === 'object' && 'data' in error
+                ? 'Invalid credentials'
+                : 'Login failed. Please try again.'}
+            </Alert>
+          )}
+
+          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ width: '100%', mt: 1 }}>
             <TextField
               margin="normal"
               required
@@ -172,9 +198,9 @@ const LoginPage: React.FC = () => {
               onChange={handleEmailChange}
               error={!!errors.email}
               helperText={errors.email}
-              disabled={loading}
+              disabled={isLoading}
             />
-            
+
             <TextField
               margin="normal"
               required
@@ -188,7 +214,7 @@ const LoginPage: React.FC = () => {
               onChange={handlePasswordChange}
               error={!!errors.password}
               helperText={errors.password}
-              disabled={loading}
+              disabled={isLoading}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
@@ -203,19 +229,30 @@ const LoginPage: React.FC = () => {
                 ),
               }}
             />
-            
+
             <Button
               type="submit"
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2, py: 1.5 }}
-              disabled={loading}
-              startIcon={loading ? <CircularProgress size={20} /> : null}
+              disabled={isLoading}
+              startIcon={isLoading ? <CircularProgress size={20} /> : null}
             >
-              {loading ? 'Signing In...' : 'Sign In'}
+              {isLoading ? 'Signing In...' : 'Sign In'}
             </Button>
+
+            <Divider sx={{ my: 2 }} />
+
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography variant="body2">
+                Don't have an account?{' '}
+                <Link component={RouterLink} to={ROUTES.REGISTER} variant="body2">
+                  Create account
+                </Link>
+              </Typography>
+            </Box>
           </Box>
-          
+
           <Box sx={{ mt: 2, textAlign: 'center' }}>
             <Typography variant="body2" color="text.secondary">
               Demo credentials: admin@example.com / admin123

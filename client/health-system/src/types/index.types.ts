@@ -38,3 +38,11 @@ export interface ProgramsState {
     read: boolean;
     timestamp: number;
   }
+
+export  interface statCards{
+    title:string;
+    value:number;
+    icon:any;
+    color:string;
+  
+  }

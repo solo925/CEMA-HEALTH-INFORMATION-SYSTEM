@@ -3,6 +3,7 @@ export const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localh
 export const API_PATHS = {
   AUTH: {
     LOGIN: `${API_BASE_URL}/auth/login/`,
+    REGISTER: `${API_BASE_URL}/auth/register/`,
     REFRESH: `${API_BASE_URL}/auth/refresh/`,
     LOGOUT: `${API_BASE_URL}/auth/logout/`,
   },
@@ -15,6 +16,6 @@ export const API_PATHS = {
   PROGRAMS: {
     BASE: `${API_BASE_URL}/programs/`,
     DETAIL: (id: string) => `${API_BASE_URL}/programs/${id}/`,
+    CLIENTS: (id: string) => `${API_BASE_URL}/programs/${id}/clients/`,
   },
 };
-

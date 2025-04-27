@@ -49,16 +49,16 @@ const ClientsPage = () => {
   
   const { data: clients, isLoading, isError, refetch } = useGetClientsQuery();
   
-  const handleChangePage = useCallback((event, newPage) => {
+  const handleChangePage = useCallback((event: any, newPage: React.SetStateAction<number>) => {
     setPage(newPage);
   }, []);
   
-  const handleChangeRowsPerPage = useCallback((event) => {
+  const handleChangeRowsPerPage = useCallback((event: { target: { value: string; }; }) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   }, []);
   
-  const handleSearchChange = useCallback((e) => {
+  const handleSearchChange = useCallback((e: { target: { value: React.SetStateAction<string>; }; }) => {
     setSearchQuery(e.target.value);
     setPage(0);
   }, []);
@@ -80,15 +80,15 @@ const ClientsPage = () => {
     refetch();
   }, [handleCloseAddDialog, refetch]);
   
-  const handleViewClient = useCallback((clientId) => {
+  const handleViewClient = useCallback((clientId: string | undefined) => {
     navigate(ROUTES.CLIENTS.DETAIL(clientId));
   }, [navigate]);
   
-  const handleEditClient = useCallback((clientId) => {
+  const handleEditClient = useCallback((clientId: string | undefined) => {
     navigate(ROUTES.CLIENTS.EDIT(clientId));
   }, [navigate]);
   
-  const handleEnrollClient = useCallback((clientId) => {
+  const handleEnrollClient = useCallback((clientId: string | undefined) => {
     navigate(ROUTES.CLIENTS.ENROLL(clientId));
   }, [navigate]);
   
